@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
   // Retrieve relevant context from the knowledge base
   const contextDocs = await getRelevantDocs();
-  const contextText = (contextDocs as any[]).map((doc: any) => doc.pageContent).join('\n\n');
+  const contextText = (contextDocs as any[])?.map((doc: any) => doc.pageContent)?.join('\n\n');
 
   const fullPrompt = [
     { role: 'system', content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}\n\nContext:\n${contextText}` },
