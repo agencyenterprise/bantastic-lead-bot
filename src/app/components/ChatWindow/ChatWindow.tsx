@@ -54,7 +54,7 @@ const ChatWindow: React.FC = () => {
   };
 
   return (
-    <div className="w-[400px] h-[500px] border border-gray-300 rounded-lg flex flex-col bg-neutral-900">
+    <div className="w-[600px] h-[750px] border border-gray-300 rounded-lg flex flex-col bg-neutral-900">
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-2">
         {messages.map((msg, idx) => (
           <MessageBubble key={idx} text={msg.content} sender={msg.role === 'user' ? 'user' : 'bot'} />
@@ -63,7 +63,7 @@ const ChatWindow: React.FC = () => {
           <MessageBubble text="..." sender="bot" />
         )}
       </div>
-      <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />
+      { !loading && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
       <div className="flex p-2 border-t border-gray-700 bg-neutral-800">
         <input
           type="text"

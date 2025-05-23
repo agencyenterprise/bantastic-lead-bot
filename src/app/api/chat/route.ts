@@ -1,14 +1,16 @@
 import { callOpenAI } from '@/api/lib/llmClient';
-import { AE_SYSTEM_PROMPT, SUGGESTED_PROMPTS_SYSTEM_PROMPT } from '@/api/lib/promptTemplates';
-
-const servicesSummary = "AE Studio offers custom AI development, brain-computer interfaces, and data science solutions for startups and enterprises.";
+import { AE_SYSTEM_PROMPT, NEGATIVE_ALIGNMENT_PROMPT, SUGGESTED_PROMPTS_SYSTEM_PROMPT } from '@/api/lib/promptTemplates';
+import { getRelevantDocs } from '@/api/lib/knowledgeBase';
 
 export async function POST(req: Request) {
   const { messages, userMessage } = await req.json();
 
-  const context = servicesSummary;
+  // Retrieve relevant context from the knowledge base
+  const contextDocs = await getRelevantDocs(userMessage);
+  const contextText = contextDocs.map((doc: any) => doc.pageContent).join('\n\n');
+
   const fullPrompt = [
-    { role: 'system', content: `${AE_SYSTEM_PROMPT}\n\nContext:\n${context}` },
+    { role: 'system', content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}\n\nContext:\n${contextText}` },
     ...messages,
     { role: 'user', content: userMessage },
   ];
