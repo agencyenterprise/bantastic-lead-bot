@@ -41,7 +41,7 @@ export async function getVectorStore() {
 }
 
 // Retrieve relevant docs for a query
-export async function getRelevantDocs(query: string, k = 3) {
+export async function getRelevantDocs() {
   if (firstRequest) {
     firstRequest = false;
     const docs = loadDocs();
