@@ -63,7 +63,7 @@ const ChatWindow: React.FC = () => {
           <MessageBubble text="..." sender="bot" />
         )}
       </div>
-      { !loading && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
+      {!loading && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
       <div className="flex p-2 border-t border-gray-700 bg-neutral-800">
         <input
           type="text"

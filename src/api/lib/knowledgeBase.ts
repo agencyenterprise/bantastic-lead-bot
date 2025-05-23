@@ -4,6 +4,8 @@ import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from 'langchain/document';
 
+let firstRequest = true;
+
 // Load all docs from /knowledge/
 function loadDocs() {
   const knowledgeDir = path.join(process.cwd(), 'knowledge');
@@ -40,6 +42,10 @@ export async function getVectorStore() {
 
 // Retrieve relevant docs for a query
 export async function getRelevantDocs(query: string, k = 3) {
-  const store = await getVectorStore();
-  return store.similaritySearch(query, k);
+  if (firstRequest) {
+    firstRequest = false;
+    const docs = loadDocs();
+    return docs;
+  }
+  return 'Previous context';
 } 
