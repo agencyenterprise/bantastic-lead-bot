@@ -19,7 +19,7 @@ const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
 
-const chromaUrl = process.env.CHROMA_URL || "http://localhost:8000";
+const chromaUrl = process.env.CHROMA_PRIVATE_URL || "http://localhost:8000";
 const vectorStore = new Chroma(embeddings, {
   collectionName: "bantastic-knowledge-base",
   url: chromaUrl,
