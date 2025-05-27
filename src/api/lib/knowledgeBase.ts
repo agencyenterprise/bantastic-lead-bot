@@ -21,12 +21,13 @@ const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
 
+const chromaUrl = process.env.CHROMA_URL || "http://localhost:8000";
 const vectorStore = new Chroma(embeddings, {
   collectionName: "bantastic-knowledge-base",
-  url: "http://localhost:8000", // Optional, will default to this value
+  url: chromaUrl,
   collectionMetadata: {
     "hnsw:space": "cosine",
-  }, // Optional, can be used to specify the distance method of the embedding space https://docs.trychroma.com/usage-guide#changing-the-distance-function
+  },
 });
 
 let firstLoad = true;
@@ -41,11 +42,9 @@ export async function getVectorStore() {
 }
 
 // Retrieve relevant docs for a query
-export async function getRelevantDocs() {
-  if (firstRequest) {
-    firstRequest = false;
-    const docs = loadDocs();
-    return docs;
-  }
-  return 'Previous context';
+export async function getRelevantDocs(query: string) {
+  const store = await getVectorStore();
+  // Use similarity search to get top 4 relevant docs
+  const results = await store.similaritySearch(query, 4);
+  return results;
 } 

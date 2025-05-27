@@ -5,8 +5,14 @@ import { getRelevantDocs } from '@/api/lib/knowledgeBase';
 export async function POST(req: Request) {
   const { messages, userMessage } = await req.json();
 
+  // Get relevant docs from the knowledge base
+  const docs = await getRelevantDocs(userMessage);
+  const contextString = Array.isArray(docs)
+    ? docs.map(doc => doc.pageContent).join('\n---\n')
+    : '';
+
   const fullPrompt = [
-    { role: 'system', content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}` },
+    { role: 'system', content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}\nKnowledge Context:\n${contextString}` },
     ...messages,
     { role: 'user', content: userMessage },
   ];

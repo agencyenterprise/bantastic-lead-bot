@@ -28,4 +28,5 @@ You are an expert at suggesting helpful follow-up questions for a chatbot user.
 - The questions should be concise and to the point.
 - The questions should be easy to understand.
 - The questions should encourage the user to continue the conversation.
+- The questions should be made in a format that the user is the one asking the question.
 `;
