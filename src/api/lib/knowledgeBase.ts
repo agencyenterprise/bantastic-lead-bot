@@ -12,6 +12,9 @@ function loadDocs() {
   }));
 }
 
+console.log("CHROMA_URL:", process.env.CHROMA_URL);
+console.log("CHROMA_TOKEN:", process.env.CHROMA_TOKEN ? "set" : "not set");
+
 // Set up ChromaDB client with authentication
 const chroma = new ChromaClient({
   path: process.env.CHROMA_URL,
