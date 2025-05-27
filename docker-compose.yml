@@ -8,11 +8,15 @@ services:
       - chroma_data:/chroma/.chroma/index
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - OPENAI_API_KEY=${OPENAI_API_KEY}
     ports:
       - "3000:3000"
     environment:
       - CHROMA_URL=http://chromadb:8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - chromadb
     volumes:
