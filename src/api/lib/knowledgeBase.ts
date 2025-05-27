@@ -4,8 +4,6 @@ import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from 'langchain/document';
 
-let firstRequest = true;
-
 // Load all docs from /knowledge/
 function loadDocs() {
   const knowledgeDir = path.join(process.cwd(), 'knowledge');
