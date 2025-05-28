@@ -1,11 +1,13 @@
 import React from 'react';
+import LoadingDots from '../LoadingDots/LoadingDots';
 
 interface MessageBubbleProps {
   text: string;
   sender: 'user' | 'bot';
+  loading?: boolean;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ text, sender }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ text, sender, loading }) => {
   const isUser = sender === 'user';
   return (
     <div
@@ -15,7 +17,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ text, sender }) => {
           : 'self-start bg-neutral-700'
       }`}
     >
-      {text}
+      {loading ? <LoadingDots /> : text}
     </div>
   );
 };

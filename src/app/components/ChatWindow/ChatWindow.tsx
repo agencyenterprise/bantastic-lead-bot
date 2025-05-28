@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MessageBubble from '../MessageBubble/MessageBubble';
 import SuggestedPrompts from '../SuggestedPrompts/SuggestedPrompts';
 import type { ChatMessage } from '../../../../types/chat';
@@ -19,6 +19,13 @@ const ChatWindow: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [samplePrompts, setSamplePrompts] = useState<string[]>(defaultPrompts);
+  const bottomOfMessagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (bottomOfMessagesRef.current) {
+      bottomOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const sendMessage = async () => {
     if (input.trim() === '' || loading) return;
@@ -60,8 +67,9 @@ const ChatWindow: React.FC = () => {
           <MessageBubble key={idx} text={msg.content} sender={msg.role === 'user' ? 'user' : 'bot'} />
         ))}
         {loading && (
-          <MessageBubble text="..." sender="bot" />
+          <MessageBubble loading sender="bot" text="" />
         )}
+        <div ref={bottomOfMessagesRef} id='bottom-of-messages' />
       </div>
       {!loading && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
       <div className="flex p-2 border-t border-gray-700 bg-neutral-800">
