@@ -16,8 +16,7 @@ function loadDocs() {
 
 // Set up Qdrant client
 const qdrantUrl = process.env.QDRANT_URL || "http://localhost:6333";
-const qdrantClient = new QdrantClient({ url: qdrantUrl });
-
+const qdrantClient = new QdrantClient({ url: qdrantUrl, checkCompatibility: false });
 // Set up embeddings
 const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
