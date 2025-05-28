@@ -2,19 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { ChromaClient } from 'chromadb';
 
-// Load all docs from /knowledge/
-function loadDocs() {
-  const knowledgeDir = path.join(process.cwd(), 'knowledge');
-  const files = fs.readdirSync(knowledgeDir);
-  return files.map(filename => ({
-    content: fs.readFileSync(path.join(knowledgeDir, filename), 'utf8'),
-    source: filename,
-  }));
-}
-
-console.log("CHROMA_URL:", process.env.CHROMA_URL);
-console.log("CHROMA_TOKEN:", process.env.CHROMA_TOKEN ? "set" : "not set");
-
 // Set up ChromaDB client with authentication
 const chroma = new ChromaClient({
   path: process.env.CHROMA_URL,
@@ -24,6 +11,16 @@ const chroma = new ChromaClient({
     tokenHeaderType: "AUTHORIZATION"
   }
 });
+
+// Load all docs from /knowledge/
+function loadDocs() {
+  const knowledgeDir = path.join(process.cwd(), 'knowledge');
+  const files = fs.readdirSync(knowledgeDir);
+  return files.map(filename => ({
+    content: fs.readFileSync(path.join(knowledgeDir, filename), 'utf8'),
+    source: filename,
+  }));
+}
 
 // Utility to upsert documents into a collection
 export async function upsertKnowledgeBase() {
