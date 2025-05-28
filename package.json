@@ -9,9 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@langchain/community": "^0.3.44",
+    "@langchain/community": "^0.3.45",
     "@langchain/core": "^0.3.57",
     "@langchain/openai": "^0.5.11",
+    "@qdrant/js-client-rest": "^1.13.0",
     "chromadb": "^2.4.6",
     "langchain": "^0.3.27",
     "next": "15.3.2",
