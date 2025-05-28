@@ -1,5 +1,6 @@
 import React from 'react';
 import LoadingDots from '../LoadingDots/LoadingDots';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageBubbleProps {
   text: string;
@@ -17,7 +18,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ text, sender, loading }) 
           : 'self-start bg-neutral-700'
       }`}
     >
-      {loading ? <LoadingDots /> : text}
+      {loading ? <LoadingDots /> : <ReactMarkdown>{text}</ReactMarkdown>}
     </div>
   );
 };
