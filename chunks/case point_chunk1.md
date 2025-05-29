@@ -1,0 +1,12 @@
+---
+source: case point.md
+type: case_study
+chunk: 1
+total_chunks: 1
+---
+
+We worked with the awesome Point team to build a health & fitness app to help users get more from their wearables data. We worked with health and exercise experts on the Point team to create a proprietary health scoring, insight and recommendation engine and react native app for users to connect their wearables, track their goals and progress and see their insights and recommendations.
+What they say about us
+
+
+"AE Studio continues to be the perfect partner for us. When we began we had a few technological hurdles and AE systematically mitigated those core risks, accelerated our development timeline by 3.5 months, and delivered a beautiful user experience. It’s rare when you find a group of people that are extremely talented, display proficiency in their domain, and are genuinely good people. Fortunately, they exist and are at AE Studio delivering technical products with elegance and efficiency!" - Kingsley McGowan, CEO Point

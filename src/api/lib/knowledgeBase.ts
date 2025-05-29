@@ -4,9 +4,9 @@ import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from 'langchain/document';
 
-// Load all docs from /knowledge/
+// Load all docs from /chunks/
 function loadDocs() {
-  const knowledgeDir = path.join(process.cwd(), 'knowledge');
+  const knowledgeDir = path.join(process.cwd(), 'chunks');
   const files = fs.readdirSync(knowledgeDir);
   return files.map(filename => 
     new Document({ pageContent: fs.readFileSync(path.join(knowledgeDir, filename), 'utf8'), metadata: { source: filename } })

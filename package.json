@@ -6,12 +6,15 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start -H 0.0.0.0",
-    "lint": "next lint"
+    "lint": "next lint",
+    "chunk": "tsx ./scripts/chunk-knowledge.ts",
+    "migrate": "tsx ./scripts/upsert-chunks-to-chroma.ts"
   },
   "dependencies": {
     "@langchain/community": "^0.3.45",
     "@langchain/core": "^0.3.57",
     "@langchain/openai": "^0.5.11",
+    "@langchain/textsplitters": "^0.1.0",
     "@qdrant/js-client-rest": "^1.13.0",
     "chromadb": "^2.4.6",
     "langchain": "^0.3.27",
@@ -30,7 +33,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
+    "js-yaml": "^4.1.0",
     "tailwindcss": "^4",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }
