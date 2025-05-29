@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MessageBubble from '../MessageBubble/MessageBubble';
 import SuggestedPrompts from '../SuggestedPrompts/SuggestedPrompts';
 import type { ChatMessage } from '../../../../types/chat';
@@ -12,6 +12,8 @@ const defaultPrompts = [
 
 const greetMessage = 'Hello! I\'m AE\'s assistant. How can I help you today?';
 
+const INACTIVITY_LIMIT_MS = 2 * 60 * 1000; // 2 minutes
+
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'assistant', content: greetMessage },
@@ -19,7 +21,11 @@ const ChatWindow: React.FC = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [samplePrompts, setSamplePrompts] = useState<string[]>(defaultPrompts);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [chatEnded, setChatEnded] = useState(false);
+  const [report, setReport] = useState<string | null>(null);
   const bottomOfMessagesRef = useRef<HTMLDivElement>(null);
+  const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (bottomOfMessagesRef.current) {
@@ -27,9 +33,45 @@ const ChatWindow: React.FC = () => {
     }
   }, [messages]);
 
+  // Reset inactivity timer
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    inactivityTimer.current = setTimeout(() => {
+      handleEndChat();
+    }, INACTIVITY_LIMIT_MS);
+  }, [conversationId, chatEnded]);
+
+  // Reset timer on every message change
+  useEffect(() => {
+    if (!chatEnded) resetInactivityTimer();
+    return () => {
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, [messages, chatEnded, resetInactivityTimer]);
+
+  // End chat handler
+  const handleEndChat = async () => {
+    if (!conversationId || chatEnded) return;
+    setChatEnded(true);
+    setInput('');
+    setLoading(false);
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    try {
+      const res = await fetch('/api/chat/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId }),
+      });
+      const data = await res.json();
+      setReport(data.summary || 'No summary available.');
+    } catch (err) {
+      setReport('Failed to generate report.');
+    }
+  };
+
   // Streaming sendMessage
   const sendMessageStream = async () => {
-    if (input.trim() === '' || loading) return;
+    if (input.trim() === '' || loading || chatEnded) return;
     const newMessages: ChatMessage[] = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
     setSamplePrompts([]);
@@ -45,8 +87,15 @@ const ChatWindow: React.FC = () => {
         body: JSON.stringify({
           messages: newMessages.filter(m => m.role !== 'system'),
           userMessage: input,
+          ...(conversationId ? { conversationId } : {}),
         }),
       });
+
+      // Extract conversationId from response header if not already set
+      if (!conversationId) {
+        const headerConvId = res.headers.get('X-Conversation-Id');
+        if (headerConvId) setConversationId(headerConvId);
+      }
 
       const suggestedPromptsRes = await fetch('/api/chat/suggested-prompts', {
         method: 'POST',
@@ -115,8 +164,14 @@ const ChatWindow: React.FC = () => {
           <MessageBubble loading sender="bot" text="" />
         )}
         <div ref={bottomOfMessagesRef} id='bottom-of-messages' />
+        {chatEnded && report && (
+          <div className="mt-4 p-4 bg-neutral-800 rounded text-white border border-indigo-500">
+            <h3 className="font-bold mb-2 text-indigo-300">Conversation Summary</h3>
+            <pre className="whitespace-pre-wrap text-sm">{report}</pre>
+          </div>
+        )}
       </div>
-      {!loading && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
+      {!loading && !chatEnded && <SuggestedPrompts prompts={samplePrompts} onPromptClick={promptClick} />}
       <div className="flex p-2 border-t border-gray-700 bg-neutral-800">
         <input
           type="text"
@@ -124,15 +179,22 @@ const ChatWindow: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') sendMessageStream(); }}
           className="flex-1 p-2 rounded bg-neutral-700 text-white outline-none border-none"
-          placeholder="Type your message..."
-          disabled={loading}
+          placeholder={chatEnded ? "Chat ended." : "Type your message..."}
+          disabled={loading || chatEnded}
         />
         <button
           onClick={sendMessageStream}
           className="ml-2 px-4 py-2 rounded bg-indigo-500 text-white border-none hover:bg-indigo-600 transition-colors"
-          disabled={loading}
+          disabled={loading || chatEnded}
         >
           Send
+        </button>
+        <button
+          onClick={handleEndChat}
+          className="ml-2 px-4 py-2 rounded bg-red-500 text-white border-none hover:bg-red-600 transition-colors"
+          disabled={chatEnded || !conversationId}
+        >
+          End Chat
         </button>
       </div>
     </div>

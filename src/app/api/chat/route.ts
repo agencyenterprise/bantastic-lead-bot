@@ -4,6 +4,7 @@ import {
   NEGATIVE_ALIGNMENT_PROMPT,
 } from "@/api/lib/promptTemplates";
 import { getRelevantDocs } from "@/api/lib/knowledgeBase";
+import { createConversationId, logMessage } from "@/api/lib/prisma";
 
 /**
  * POST endpoint that generates a response from the AI assistant
@@ -14,7 +15,16 @@ import { getRelevantDocs } from "@/api/lib/knowledgeBase";
  * @throws Will return a JSON error response if OpenAI call fails
  */
 export async function POST(req: Request) {
-  const { messages, userMessage } = await req.json();
+  const { messages, userMessage, conversationId } = await req.json();
+
+  // If no conversationId, create a new one
+  const convId = conversationId || (await createConversationId()).id;
+
+  await logMessage({
+    conversationId: convId,
+    sender: "user",
+    content: userMessage,
+  });
 
   // Get relevant docs from the knowledge base
   const docs = await getRelevantDocs(userMessage);
