@@ -1,20 +1,34 @@
-import { callOpenAI } from '@/api/lib/llmClient';
-import { AE_SYSTEM_PROMPT, NEGATIVE_ALIGNMENT_PROMPT, SUGGESTED_PROMPTS_SYSTEM_PROMPT } from '@/api/lib/promptTemplates';
-import { getRelevantDocs } from '@/api/lib/knowledgeBase';
+import { callOpenAI } from "@/api/lib/llmClient";
+import {
+  AE_SYSTEM_PROMPT,
+  NEGATIVE_ALIGNMENT_PROMPT,
+} from "@/api/lib/promptTemplates";
+import { getRelevantDocs } from "@/api/lib/knowledgeBase";
 
+/**
+ * POST endpoint that generates a response from the AI assistant
+ * @param req - HTTP Request object containing:
+ *   - messages: Previous conversation messages
+ *   - userMessage: Latest message from the user
+ * @returns JSON response containing the AI's response
+ * @throws Will return a JSON error response if OpenAI call fails
+ */
 export async function POST(req: Request) {
   const { messages, userMessage } = await req.json();
 
   // Get relevant docs from the knowledge base
   const docs = await getRelevantDocs(userMessage);
   const contextString = Array.isArray(docs)
-    ? docs.map(doc => doc.pageContent).join('\n---\n')
-    : '';
+    ? docs.map((doc) => doc.pageContent).join("\n---\n")
+    : "";
 
   const fullPrompt = [
-    { role: 'system', content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}\nKnowledge Context:\n${contextString}` },
+    {
+      role: "system",
+      content: `${AE_SYSTEM_PROMPT}\n${NEGATIVE_ALIGNMENT_PROMPT}\nKnowledge Context:\n${contextString}`,
+    },
     ...messages,
-    { role: 'user', content: userMessage },
+    { role: "user", content: userMessage },
   ];
 
   try {
@@ -23,6 +37,9 @@ export async function POST(req: Request) {
 
     return Response.json({ response: aiResponse });
   } catch (error) {
-    return Response.json({ error: 'Failed to get AI response' }, { status: 500 });
+    return Response.json(
+      { error: "Failed to get AI response" },
+      { status: 500 }
+    );
   }
-} 
+}

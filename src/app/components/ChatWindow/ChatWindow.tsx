@@ -6,15 +6,15 @@ import type { ChatMessage } from '../../../../types/chat';
 
 const defaultPrompts = [
   'What services does AE Studio offer?',
-  'Show me your case studies',
+  'What are usual ways you integrate AI into your projects?',
   'How can AI help my business?',
-  'What is your project timeline?',
-  'How do I get started?'
 ];
+
+const greetMessage = 'Hello! I\'m AE\'s assistant. How can I help you today?';
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Hello! I\'m AE\'s assistant. How can I help you today?' },
+    { role: 'assistant', content: greetMessage },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
