@@ -1,8 +1,11 @@
-import { callOpenAI } from '@/api/lib/llmClient';
+import { NextRequest } from 'next/server';
+import { callOpenAIStream } from '@/api/lib/llmClient';
 import { AE_SYSTEM_PROMPT, NEGATIVE_ALIGNMENT_PROMPT, SUGGESTED_PROMPTS_SYSTEM_PROMPT } from '@/api/lib/promptTemplates';
 import { getRelevantDocs } from '@/api/lib/knowledgeBase';
 
-export async function POST(req: Request) {
+export const runtime = 'edge';
+
+export async function POST(req: NextRequest) {
   const { messages, userMessage } = await req.json();
 
   // Get relevant docs from the knowledge base
@@ -17,12 +20,23 @@ export async function POST(req: Request) {
     { role: 'user', content: userMessage },
   ];
 
-  try {
-    // This is the main assistant response
-    const aiResponse = await callOpenAI(fullPrompt);
+  const encoder = new TextEncoder();
 
-    return Response.json({ response: aiResponse });
-  } catch (error) {
-    return Response.json({ error: 'Failed to get AI response' }, { status: 500 });
-  }
+  return new Response(
+    new ReadableStream({
+      async start(controller) {
+        await callOpenAIStream(fullPrompt, (token: string) => {
+          controller.enqueue(encoder.encode(`data: ${token}\n\n`));
+        });
+        controller.close();
+      },
+    }),
+    {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
+    }
+  );
 } 
