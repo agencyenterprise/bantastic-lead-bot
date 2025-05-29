@@ -27,14 +27,19 @@ const ChatWindow: React.FC = () => {
     }
   }, [messages]);
 
-  const sendMessage = async () => {
+  // Streaming sendMessage
+  const sendMessageStream = async () => {
     if (input.trim() === '' || loading) return;
     const newMessages: ChatMessage[] = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
+    setSamplePrompts([]);
     setInput('');
     setLoading(true);
+
+    let botMsg = '';
+
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -42,17 +47,57 @@ const ChatWindow: React.FC = () => {
           userMessage: input,
         }),
       });
-      const data = await res.json();
-      if (data.response?.content) {
-        setMessages([...newMessages, { role: 'assistant' as const, content: data.response.content }]);
-      }
-      if (data.samplePrompts && Array.isArray(data.samplePrompts)) {
-        setSamplePrompts(data.samplePrompts);
+
+      const suggestedPromptsRes = await fetch('/api/chat/suggested-prompts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newMessages.filter(m => m.role !== 'system'),
+          userMessage: input,
+          aiResponseContent: botMsg,
+        }),
+      });
+      const suggestedPromptsData = await suggestedPromptsRes.json();
+      setSamplePrompts(suggestedPromptsData.samplePrompts);
+
+      if (!res.body) throw new Error('No response body');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let done = false;
+      let load = true;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        if (load) {
+          load = false;
+          setLoading(false);
+          setMessages([...newMessages, { role: 'assistant', content: '' }]);
+        }
+        done = doneReading;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          // SSE format: data: <token>\n\n
+          chunk.split('data: ').forEach((part) => {
+            if (part.trim() === '') return;
+            const token = part.replace(/\n\n$/, '');
+            botMsg += token;
+            setMessages((prev) => {
+              // Replace the last assistant message with the updated content
+              const updated = [...prev];
+              if (updated[updated.length - 1]?.role === 'assistant') {
+                updated[updated.length - 1] = { role: 'assistant', content: botMsg };
+              }
+              return updated;
+            });
+          });
+        }
       }
     } catch (err) {
-      setMessages([...newMessages, { role: 'assistant', content: 'Sorry, something went wrong.' }]);
-    } finally {
-      setLoading(false);
+      setMessages((prev) => [
+        ...prev.slice(0, -1),
+        { role: 'assistant', content: 'Sorry, something went wrong.' },
+      ]);
     }
   };
 
@@ -77,13 +122,13 @@ const ChatWindow: React.FC = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') sendMessageStream(); }}
           className="flex-1 p-2 rounded bg-neutral-700 text-white outline-none border-none"
           placeholder="Type your message..."
           disabled={loading}
         />
         <button
-          onClick={sendMessage}
+          onClick={sendMessageStream}
           className="ml-2 px-4 py-2 rounded bg-indigo-500 text-white border-none hover:bg-indigo-600 transition-colors"
           disabled={loading}
         >

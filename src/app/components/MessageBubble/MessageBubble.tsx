@@ -16,8 +16,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ text, sender, loading }) 
         isUser
           ? 'self-end bg-indigo-500'
           : 'self-start bg-neutral-700'
-      }`}
-    >
+      }`}>
       {loading ? <LoadingDots /> : <ReactMarkdown>{text}</ReactMarkdown>}
     </div>
   );
