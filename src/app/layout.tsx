@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+'use client';;
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import SideMenu, { SideMenuSection } from "./components/SideMenu/SideMenu";
+import React from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,10 +14,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Bantastic AE chatbot",
-  description: "Bantastic is a chatbot assistant for AE Studio",
-};
+const menuSections: SideMenuSection[] = [
+  {
+    label: "Main",
+    items: [
+      { label: "Chat", href: "/" },
+      { label: "Reports", href: "/report" },
+    ],
+  },
+  {
+    label: "Resources",
+    items: [
+      { label: "AE Studio", href: "https://ae.studio" },
+      // {
+      //   label: "Docs",
+      //   children: [
+      //     { label: "API Reference", href: "https://docs.ae.studio/api" },
+      //     { label: "Guides", href: "https://docs.ae.studio/guides" },
+      //   ],
+      // },
+    ],
+  },
+];
 
 export default function RootLayout({
   children,
@@ -27,7 +47,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="flex min-h-screen">
+          <SideMenu sections={menuSections} />
+          <main className="flex-1 ml-64">{children}</main>
+        </div>
       </body>
     </html>
   );
