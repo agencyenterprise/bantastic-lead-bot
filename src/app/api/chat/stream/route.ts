@@ -1,9 +1,7 @@
 import { NextRequest } from 'next/server';
 import { callOpenAIStream } from '@/api/lib/llmClient';
-import { AE_SYSTEM_PROMPT, NEGATIVE_ALIGNMENT_PROMPT, SUGGESTED_PROMPTS_SYSTEM_PROMPT } from '@/api/lib/promptTemplates';
+import { AE_SYSTEM_PROMPT, NEGATIVE_ALIGNMENT_PROMPT } from '@/api/lib/promptTemplates';
 import { getRelevantDocs } from '@/api/lib/knowledgeBase';
-
-export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   const { messages, userMessage } = await req.json();
