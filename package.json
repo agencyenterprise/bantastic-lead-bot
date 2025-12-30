@@ -27,6 +27,11 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0"
   },
+  "overrides": {
+    "@smithy/protocol-http": "^4.1.8",
+    "@smithy/signature-v4": "^4.2.4",
+    "@smithy/types": "^4.1.0"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
